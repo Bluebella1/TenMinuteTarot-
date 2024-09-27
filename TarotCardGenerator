@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Tarot Revealer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Cormorant Garamond', serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: #1a202c;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .moon {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            top: 10%;
+            right: 10%;
+            border-radius: 50%;
+            background-color: #d1d5db;
+            box-shadow: inset -25px 0 0 0 rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2.25rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            z-index: 10;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-subheading {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: italics;
+            text-align: center;
+            margin-bottom: 1rem;
+
+        }
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-image {
+            width: 15rem;
+            height: 24rem;
+            object-fit: contain, rounded corners; 
+            border-radius: 0.2rem;
+            margin-bottom: 0.2rem;
+            
+        }
+
+        .card-meaning {
+            text-align: center;
+            font-family: var(--font-body);
+            margin-top: 1rem;
+        }
+
+        .instructions {
+            font-weight: bold;
+            margin-top: 1rem;
+            text-align: center;
+            font-family: var(--font-body);
+            z-index: 10;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="moon"></div>
+    <h1>Cosmic Tarot Revealer</h1>
+    <div class="card">
+        <div class="card-title" id="cardTitle">Your Destiny Awaits</div>
+        <div class="card-content" id="cardContent">
+            <p>Tap to reveal your card</p>
+        </div>
+    </div>
+    <p class="instructions" id="instructions">Tap to start shuffling</p>
+
+    <script>
+        const majorArcana = [
+            { name: "The Fool", meaning: "New beginnings, Adventure, Spontaneity, and Innocence. The Fool represents a leap of faith, a fresh start, and the willingness to embrace the unknown without fear. It encourages you to trust the journey, even if it feels uncertain or risky.", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/The%20Fool-I01YLHEP7zJNDrokvS9Ci5I2f02Vne.JPG" },
+            { name: "The Magician", meaning: "Power, Resourcefulness, Creativity, and Manifestation. The Magician symbolizes using one’s talents and skills to manifest desires. It’s a card of action, suggesting that you have the tools and ability to create what you want in life.", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/The%20Magician%20-VMXW45tWmDqtAvLcxNqP0fOcZA73vS.JPG" },
+            { name: "The High Priestess", meaning: "Intuition, Sacred Knowledge, and Divine Feminine. The High Priestess is about listening to your inner voice and trusting your intuition. It represents hidden knowledge and the mysteries of life that unfold when you trust your instincts.", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/The%20High%20Priestess%20-cqrkgAbaxjhKqvxvm3bjconIGrKsXk.JPG" },
+            { name: "The Empress", meaning: "Fertility, Abundance, Nurturing, and Creativity. The Empress symbolizes the nurturing aspect of life, growth, and creativity. It often signifies abundance, whether in relationships, finances, or personal development.", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/The%20Empress-Pvq0rbbOHkoZU2gdR5LObrDO7TEP4K.JPG" },
+            { name: "The Emperor", meaning: "Authority, Structure, Control, and Stability. The Emperor represents order, discipline, and leadership. It’s a reminder of the importance of structure and control in your life and suggests a need for strong foundations.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Emperor%20.JPG" },
+            { name: "The Hierophant", meaning: "Tradition, Spirituality, Education, and Conformity. The Hierophant signifies a connection to tradition and conventional values. It can represent seeking spiritual guidance or adhering to societal norms and beliefs.", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/The%20Hierophant%20-DnjRq3Hjsp27RTsq6LjWeewRiV7hKv.JPG" },
+            { name: "The Lovers", meaning: "Love, Harmony, Relationships, and Choices. This card often signifies deep love, union, or the balance of dual forces. It also represents a significant choice or decision, especially in matters of the heart.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Lovers.JPG" },
+            { name: "The Chariot", meaning: "Control, Willpower, Success, and Action. The Chariot represents overcoming obstacles through determination and focus. It’s about taking charge of your life and driving toward success with self-discipline.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Chariot.JPG" },
+            { name: "Strength", meaning: "Courage, Persuasion, Influence, and Compassion. Strength symbolizes the inner resolve to overcome challenges with grace, patience, and calm. It reminds you to harness your inner power gently and compassionately.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/Strength.JPG" },
+            { name: "The Hermit", meaning: "Soul-searching, Introspection, and Inner Guidance. The Hermit suggests a period of withdrawal for inner reflection. It’s a time to seek wisdom within, away from the distractions of the external world, to gain clarity.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Hermit.JPG" },
+            { name: "Wheel of Fortune", meaning: "Good luck, Karma, and Life Cycles. The Wheel of Fortune represents the cycles of life, both the ups and downs. It suggests that change is inevitable, and life moves in cycles—luck and fortune may shift unexpectedly.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/Wheel%20of%20Fortune.JPG" },
+            { name: "Justice", meaning: "Fairness, Truth, Cause and Effect. Justice indicates that actions have consequences, and fairness will prevail. It’s a card of balance, accountability, and making ethical decisions.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/Justice.JPG" },
+            { name: "The Hanged Man", meaning: "Surrender, New Perspective, and Enlightenment. The Hanged Man suggests a pause, a moment of suspension, or a need to surrender control. It invites you to see things from a different perspective and embrace patience.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Hanged%20Man%20.JPG" },
+            { name: "Death", meaning: "Endings, Change, Rebirth and Transformation. While Death may seem ominous, it’s about transformation and letting go of what no longer serves you. It marks an ending that leads to a new beginning, a necessary cycle of life.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/Death%20.JPG" },
+            { name: "Temperance", meaning: "Balance, Moderation, and Patience. Temperance encourages balance, moderation, and patience in all things. It suggests that healing and blending opposing forces will bring peace and harmony.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/Temperance%20.JPG" },
+            { name: "The Devil", meaning: "Shadow self, Addiction, Restriction and Temptation. The Devil represents feeling trapped by unhealthy patterns, addiction, or materialism. It’s a call to free yourself from limiting beliefs or toxic situations.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Devil.JPG" },
+            { name: "The Tower", meaning: "Sudden Change, Upheaval, and Revelation. The Tower represents sudden, sometimes chaotic change. It may feel destructive, but it clears the way for new growth and insights by breaking down false foundations.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Tower.JPG" },
+            { name: "The Star", meaning: "Hope, Faith, Purpose, and Renewal. The Star is a card of healing and inspiration. It suggests renewal, hope, and faith in the future, bringing light after the darkness of the Tower card.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Star.JPG" },
+            { name: "The Moon", meaning: "Illusion, Intuition, Confusion, and Dreams. The Moon represents the subconscious, hidden truths, and illusions. It suggests a time of uncertainty and advises relying on intuition to navigate unclear situations.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Moon.JPG" },
+            { name: "The Sun", meaning: "Positivity, Fun, Warmth, and Success. The Sun represents positivity, success, and clarity. It’s a card of warmth, joy, and vitality, suggesting that things are moving in a bright and promising direction.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20Sun.JPG" },
+            { name: "Judgement", meaning: "Rebirth, Inner Calling, and Absolution. Judgment represents a moment of awakening and self-reflection. It suggests evaluating your past actions and making decisions based on your higher calling or inner truth.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/Judgement%20.JPG" },
+            { name: "The World", meaning: "Completion, fulfillment, and wholeness. The World signifies the end of a journey and the completion of a cycle. It represents fulfillment, harmony, and the sense of being whole after having achieved a major life goal.", image: "https://assets.onecompiler.app/42tcd5xkg/42tcurp3r/The%20World.JPG" },
+
+        ];
+
+        let currentCardIndex = 0;
+        let isRunning = false;
+        let selectedCard = null;
+        let intervalId = null;
+
+        const cardTitle = document.getElementById('cardTitle');
+        const cardContent = document.getElementById('cardContent');
+        const instructions = document.getElementById('instructions');
+
+        function createStars() {
+            const starsContainer = document.querySelector('.stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${Math.random() * 2 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animation = `twinkle ${Math.random() * 5 + 5}s linear infinite`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function updateCard() {
+            if (isRunning) {
+                cardTitle.textContent = "The Cosmos Align...";
+                const card = majorArcana[currentCardIndex];
+                cardContent.innerHTML = `
+                    <img src="${card.image}" alt="${card.name}" class="card-image">
+                `;
+                currentCardIndex = (currentCardIndex + 1) % majorArcana.length;
+            } else if (selectedCard) {
+                cardTitle.textContent = selectedCard.name;
+                cardContent.innerHTML = `
+                    <img src="${selectedCard.image}" alt="${selectedCard.name}" class="card-image">
+                    <p class="card-meaning">${selectedCard.meaning}</p>
+                `;
+            } else {
+                cardTitle.textContent = "Your Destiny Awaits";
+                cardContent.innerHTML = `<p>Tap to reveal your card</p>`;
+            }
+            instructions.textContent = `Tap to ${isRunning ? "stop" : "start"} shuffling`;
+        }
+
+        function handleTap() {
+            isRunning = !isRunning;
+            if (isRunning) {
+                selectedCard = null;
+                intervalId = setInterval(() => {
+                    currentCardIndex = (currentCardIndex + 1) % majorArcana.length;
+                    updateCard();
+                }, 100);
+            } else {
+                clearInterval(intervalId);
+                if (!selectedCard) {
+                    const randomIndex = Math.floor(Math.random() * majorArcana.length);
+                    selectedCard = majorArcana[randomIndex];
+                }
+            }
+            updateCard();
+        }
+
+        document.body.addEventListener('click', handleTap);
+
+        createStars();
+        updateCard();
+    </script>
+</body>
+</html>
